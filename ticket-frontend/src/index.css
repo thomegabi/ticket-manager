@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --font-orbitron: "Orbitron", sans-serif;
+  --font-inter: "Inter", sans-serif;
+}
+
+@utility font-orbitron {
+  font-family: var(--font-orbitron);
+}
+
+@utility font-inter {
+  font-family: var(--font-inter);
+}
+
+@utility bg-pattern {
+  background-image: url("/bg.png");
+}

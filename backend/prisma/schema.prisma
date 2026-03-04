@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @unique @default(uuid())
+  name          String    @unique
+  password      String
+  isAdmin       Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime?
+  assignedCases Case[]    @relation("AssignedCases")
+  openedCases   Case[]    @relation("OpenedCases")
+}
+
+model Case {
+  id           String       @id @unique @default(uuid())
+  company      Company
+  status       TicketStatus @default(OPEN)
+  priority     Priority
+  description  String
+  duration     String?
+  openedById   String?
+  assignedToId String?
+  created_at   DateTime     @default(now())
+  updated_at   DateTime?
+  openedByName String
+  assignedTo   User?        @relation("AssignedCases", fields: [assignedToId], references: [id])
+  openedBy     User?        @relation("OpenedCases", fields: [openedById], references: [id])
+
+  @@index([assignedToId])
+  @@index([openedById])
+}
+
+enum TicketStatus {
+  OPEN
+  CLOSED
+  IN_PROGRESS
+}
+
+enum Priority {
+  VERY_LOW
+  LOW
+  NORMAL
+  HIGH
+  VERY_HIGH
+}
+
+enum Company {
+  FORD_CHAPECO
+  FORD_XANXERE
+  KIA
+  LOCALIZA
+}
