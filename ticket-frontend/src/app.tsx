@@ -4,9 +4,6 @@ import { HomePage } from './pages/home/index';
 import { ProtectedRoute } from './components/routeProtection';
 import { AuthProvider } from '../context/authContext';
 
-
-
-
 const router = createBrowserRouter([
   {
     path: "/",

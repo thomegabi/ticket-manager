@@ -1,8 +1,9 @@
 import { Key, User, X } from "lucide-react"
-import type { FormEvent } from "react"
+import { useContext, type FormEvent } from "react"
 import { Button } from "../../components/button"
 import { api } from "../../../lib/axios"
 import { useNavigate } from "react-router-dom"
+import { AuthContext } from "../../../context/authContext"
 
 interface SignUpModalProps {
   closeSignUpModal: () => void,
@@ -10,6 +11,7 @@ interface SignUpModalProps {
 
 export function SignUpModal({ closeSignUpModal }: SignUpModalProps){
   const navigate = useNavigate()
+   const { setToken } = useContext(AuthContext)
 
   async function createUser(event: FormEvent<HTMLFormElement>){
     event.preventDefault()
@@ -30,6 +32,8 @@ export function SignUpModal({ closeSignUpModal }: SignUpModalProps){
     )
 
     sessionStorage.setItem('token', response.data.token)
+
+    setToken(response.data.token, response.data.adm)
       
       navigate('/home')
     }catch(e){

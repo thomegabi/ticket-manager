@@ -1,8 +1,9 @@
 import { Key, User, X } from "lucide-react"
-import { useState, type FormEvent } from "react"
+import { useContext, useState, type FormEvent } from "react"
 import { Button } from "../../components/button"
 import { api } from "../../../lib/axios"
 import { useNavigate } from "react-router-dom"
+import { AuthContext } from "../../../context/authContext"
 
 interface LoginModalProps {
   closeLoginModal: () => void,
@@ -11,6 +12,7 @@ interface LoginModalProps {
 export function LoginModal({ closeLoginModal}: LoginModalProps){
   const navigate = useNavigate()
   const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
+  const { setToken } = useContext(AuthContext)
 
   async function login(event: FormEvent<HTMLFormElement>){
     event.preventDefault()
@@ -30,7 +32,11 @@ export function LoginModal({ closeLoginModal}: LoginModalProps){
         password,
       })
 
+      setToken(response.data.token, response.data.adm)
+
        sessionStorage.setItem('token', response.data.token)
+
+       console.log(response)
 
       navigate('/home')
     
