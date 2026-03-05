@@ -1,8 +1,7 @@
-import { Building, CircleAlert, Info, Key, User, X } from "lucide-react"
+import { Building, CircleAlert, Info, User, X } from "lucide-react"
 import { useState, type FormEvent } from "react"
-import { Button } from "../../../components/button" 
-import { api } from "../../../../lib/axios" 
-import { useNavigate } from "react-router-dom"
+import { Button } from "../../../components/button"
+import { api } from "../../../../lib/axios"
 
 interface NewTicketModalProps {
   closeNewTicketModal: () => void,
@@ -11,28 +10,37 @@ interface NewTicketModalProps {
 export function NewTicketModal({ closeNewTicketModal}: NewTicketModalProps){
 const [ selectedCompany, setSelectedCompany ] = useState<string>('')
 const [ selectedPriority, setSelectedPriority ] = useState<string>('')
+const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
 
 
-  async function login(event: FormEvent<HTMLFormElement>){
+  async function createTicket(event: FormEvent<HTMLFormElement>){
     event.preventDefault()
+    setErrorHandler(null)
 
-    const data = new FormData(event.currentTarget)
-    
-    const company = data.get('company')     
-    const priority = data.get('priority')     
-    const description = data.get('description')
-    const openedByName = data.get('openedByName')
-    console.log(company, priority, description, openedByName)
+    const data = new FormData(event.currentTarget)    
+    const description = data.get('description')?.toString()
+    const openedByName = data.get('openedByName')?.toString()
+
+    if(!description?.trim()){
+      setErrorHandler('Descreva o seu problema')
+      return
+    }
+
+    if(!openedByName?.trim()){
+      setErrorHandler('Usuario não identificado')
+      return
+    }
 
     try{
       await api.post('/cases/create', {
         openedByName,
-        company,
-        priority,
+        company: selectedCompany,
+        priority: selectedPriority,
         description
       })
 
       closeNewTicketModal
+      closeNewTicketModal()
     
     }catch(err){
       console.log('Erro:', err)
@@ -46,17 +54,17 @@ const [ selectedPriority, setSelectedPriority ] = useState<string>('')
       <div className="w-160 rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold flex-col w-full text-center text-zinc-50">Login</h2>
+            <h2 className="text-lg font-semibold flex-col w-full text-center text-zinc-50">Abertura de Chamado</h2>
             <button type="button" onClick={closeNewTicketModal}>
               <X className="size-5 text-zinc-400"/>
             </button>
           </div>
           <p className="text-zinc-50 text-sm">
-            Entre com seu <span className="font-semibold text-zinc-50">Email</span> e <span className="font-semibold text-zinc-50">Senha</span>
+            Descreva o seu chamado
           </p>
         </div>
 
-        <form onSubmit={login} className="space-y-3">
+        <form onSubmit={createTicket} className="space-y-3">
           <div className="h-14 px-5 bg-zinc-950 text-zinc-50 rounded-lg flex items-center gap-2.5 justify-between">
             <User className="text-zinc-400 size-5"/>
             <input 
@@ -114,6 +122,10 @@ const [ selectedPriority, setSelectedPriority ] = useState<string>('')
               </select>
             </div>
           </div>
+
+          {errorHandler && (
+            <p className="text-rose-700 font-light justify-center text-center text-sm">*{errorHandler}*</p>
+          )}
 
           <Button type="submit" variant="primary" size="full">
             Gerar

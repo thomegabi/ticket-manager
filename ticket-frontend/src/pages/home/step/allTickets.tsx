@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
-import { api } from "../../../../lib/axios.ts"
+import { useMemo, useState } from "react";
 
 interface AllTicketsModalProps{
   handleTicketSelection: (id: string) => void;
+  cases: Cases[]
 }
 
 export interface Cases {
@@ -12,44 +12,14 @@ export interface Cases {
   priority: string
   status: string
   created_at: Date
+  updated_at: Date
   company: string
   duration: string
-  assignedToName: string
+  assignedUserName: string
 }
 
-export function AllTicketsModal({ handleTicketSelection }: AllTicketsModalProps) {
-  const [cases, setTickets] = useState<Cases[]>([])
+export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModalProps) {
   const [search, setSearch] = useState("")
-
-  useEffect(() => {
-    async function getCases() {
-      try {
-        const response = await api.get('/cases');
-
-        console.log(response)
-
-        if (response.data.casesJson) {
-          const formattedTickes = response.data.casesJson.map((caso: Cases) => ({
-            ...caso,
-            status: caso.status.toUpperCase()
-          }))
-
-          console.log(formattedTickes)
-
-          setTickets(formattedTickes)
-        } else {
-          setTickets([])
-        }
-      } catch (error) {
-        console.error(error)
-        setTickets([])
-      }
-    }
-
-    console.log(cases)
-
-    getCases()
-  }, [])
 
   const filteredCases = useMemo(() => {
     return cases.filter(caso =>
@@ -118,9 +88,19 @@ export function AllTicketsModal({ handleTicketSelection }: AllTicketsModalProps)
     }
   }
 
+  function translateCompany(company: string) {
+    switch (company) {
+      case "FORD_CHAPECO": return "Ford Chapecó"
+      case "FORD_XANXERE": return "Ford Xanxerê"
+      case "LOCALIZA": return "Localiza"
+      case "KIA": return "KIA"
+      default: return company
+    }
+  }
+
   return (
     <div className="inset-0  flex items-center justify-center z-50">
-      <div className="w-[1100px] max-h-[85vh] bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6">
+      <div className="w-275 max-h-[85vh] bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold text-white">
             Todos os Tickets
@@ -166,7 +146,7 @@ export function AllTicketsModal({ handleTicketSelection }: AllTicketsModalProps)
                 >
                   <td className="p-4 text-zinc-400">#{caso.id.slice(0,6)}</td>
                   <td className="p-4 text-white">{caso.openedByName}</td>
-                  <td className="p-4 text-zinc-400">{caso.company}</td>
+                  <td className="p-4 text-zinc-400">{translateCompany(caso.company)}</td>
 
                   <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(caso.status)}`}>

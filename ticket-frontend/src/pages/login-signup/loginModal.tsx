@@ -1,5 +1,5 @@
 import { Key, User, X } from "lucide-react"
-import type { FormEvent } from "react"
+import { useState, type FormEvent } from "react"
 import { Button } from "../../components/button"
 import { api } from "../../../lib/axios"
 import { useNavigate } from "react-router-dom"
@@ -10,9 +10,11 @@ interface LoginModalProps {
 
 export function LoginModal({ closeLoginModal}: LoginModalProps){
   const navigate = useNavigate()
+  const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
 
   async function login(event: FormEvent<HTMLFormElement>){
     event.preventDefault()
+    setErrorHandler(null)
 
     const data = new FormData(event.currentTarget)
   
@@ -33,7 +35,7 @@ export function LoginModal({ closeLoginModal}: LoginModalProps){
       navigate('/home')
     
     }catch{
-      alert('Usuário ou senha incorretos, reveja seus dados')
+      setErrorHandler('Usuário ou senha incorretos, reveja seus dados')
     }
   }
 
@@ -74,6 +76,10 @@ export function LoginModal({ closeLoginModal}: LoginModalProps){
               className="bg-transparent text-lg placeholder-zinc-400 w-40 outline-none flex-1"
             />
           </div>
+
+          {errorHandler && (
+            <p className="text-rose-700 font-light justify-center text-center text-sm">*{errorHandler}*</p>
+          )}
 
           <Button type="submit" variant="primary" size="full">
             Entrar

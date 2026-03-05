@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { CaseRepository } from '../repositories/prisma/cases-repository';
 import 'dotenv/config'
-import { UserRepository } from 'src/repositories/prisma/user-repository';
+import { UserRepository } from '../repositories/prisma/user-repository';
 
 const WEB_BASE_URL = process.env.WEB_BASE_URL
 const API_BASE_URL = process.env.API_BASE_URL
@@ -85,7 +85,11 @@ export const createCase = async (req: Request, res: Response, next: NextFunction
 };
 
 export const updateCase = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { caseId, description, status, duration, priority, company, assignedToId } = req.body
+  let { caseId } = req.params
+  const { description, status, duration, priority, company } = req.body
+  const userId = req.userId
+
+  caseId = caseId.toString()
 
   try{
 
@@ -108,10 +112,12 @@ export const updateCase = async (req: Request, res: Response, next: NextFunction
         status: status ?? undefined,
         description: description ?? undefined,
         duration: duration ?? undefined,
-        assignedToId: assignedToId ?? undefined,
+        assignedToId: userId ?? undefined,
       })
+    
+    const updatedTicket = await caseRepository.getCaseById(caseId)
 
-    res.status(200).json({message: "Case updated"})
+    res.status(200).json({updatedTicket})
     return
 
   } catch(err){

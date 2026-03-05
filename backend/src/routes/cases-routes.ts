@@ -8,6 +8,8 @@ const router = express.Router();
 
 router.get('/cases', casesController.getCases);
 
+router.get('/case/:caseId', casesController.getCasesById)
+
 router.post('/cases/create', casesController.createCase);
 
 router.put('/update/:caseId', verifyToken, casesController.updateCase)

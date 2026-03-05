@@ -1,17 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../components/button";
 import { useNavigate } from "react-router-dom";
-import { AllTicketsModal } from "./step/allTickets";
+import { AllTicketsModal, type Cases } from "./step/allTickets";
 import { NewTicketModal } from "./step/newTickerModal";
+import { SelectedTicket } from "./step/selectedTicketModal";
+import { api } from "../../../lib/axios";
 
 export function HomePage() {
   const navigate = useNavigate()
-  const [ isTicketModalOpen, setTicketModalOpen ] = useState(false);
   const [ isMyTicketsModalOpen, setMyTicketsModalOpen ] = useState(false)
   const [ isAllTicketsModalOpen, setAllTicketsModalOpen ] = useState(false)
-  const [ isSelectedTicketsOpen, setSelectedTicketsOpen ] = useState(false);
   const [ selectedTicket, setSelectedTicket ] = useState<string | null>(null);
   const [ isNewTicketModalOpen, setNewTicketModalOpen ] = useState(false);
+  const [ isSelectedTicketModalOpen, setSelectedTicketModalOpen ] = useState(false)
+  const [ cases, setTickets ] = useState<Cases[]>([])
+
+  useEffect(() => {
+    async function getCases() {
+      try {
+        const response = await api.get('/cases');
+
+        console.log(response)
+
+        if (response.data.casesJson) {
+          const formattedTickes = response.data.casesJson.map((caso: Cases) => ({
+            ...caso,
+            status: caso.status.toUpperCase()
+          }))
+
+          console.log(formattedTickes)
+
+          setTickets(formattedTickes)
+        } else {
+          setTickets([])
+        }
+      } catch (error) {
+        console.error(error)
+        setTickets([])
+      }
+    }
+
+    console.log(cases)
+
+    getCases()
+  }, [])
+
+  function handleTicketUpdated(updatedTicket: Cases) {
+      if (updatedTicket && updatedTicket.id) {
+        setTickets((prevForms) =>
+          prevForms.map((form) =>
+            form.id === updatedTicket.id ? updatedTicket : form
+          )
+        );
+      } else {
+        console.error("updatedTicket está indefinido ou não possui 'id':", updatedTicket);
+      }
+    }
+  
+  function closeSelectedTicketModal(){
+    setSelectedTicketModalOpen(false)
+  }
+
+  function openSelectedTicketModal() {
+    setSelectedTicketModalOpen(true);
+  }
 
   function openNewTicketModal(){
     setNewTicketModalOpen(true)
@@ -19,11 +71,6 @@ export function HomePage() {
 
   function closeNewTicketModal(){
     setNewTicketModalOpen(false)
-  }
-
-  function openCaseModal() {
-    closeAllModals()
-    setTicketModalOpen(true);
   }
   
   function openMyTicketModal() {
@@ -41,17 +88,10 @@ export function HomePage() {
     openSelectedTicketModal()
   }
 
-  function openSelectedTicketModal() {
-    closeAllModals();
-    setSelectedTicketsOpen(true);
-  }
-
   function closeAllModals() {
-    setTicketModalOpen(false);
     setMyTicketsModalOpen(false);
     setAllTicketsModalOpen(false);
-    setSelectedTicketsOpen(false);
-   // setSelectedCharacter(null);
+    setSelectedTicketModalOpen(false);
   }
 
   async function logout(){
@@ -91,7 +131,7 @@ export function HomePage() {
                 <p className="text-[32px] font-light">Tickets Abertos</p>
               </Button>
               <Button variant="terciary" size="full" onClick={logout}>
-                <p className="text-[35px] font-light">Exit</p>
+                <p className="text-[35px] font-light">Sair</p>
               </Button>
             </div>
           </div>
@@ -101,11 +141,19 @@ export function HomePage() {
               {isAllTicketsModalOpen && (
                 <AllTicketsModal
                   handleTicketSelection={handleTicketSelection}
+                  cases={cases}
                 />
               )}
               {isNewTicketModalOpen && (
                 <NewTicketModal
                   closeNewTicketModal={closeNewTicketModal}
+                />
+              )}
+              {isSelectedTicketModalOpen && (
+                <SelectedTicket
+                  onClose={closeSelectedTicketModal}
+                  ticketId={selectedTicket}
+                  onTicketUpdated={handleTicketUpdated}
                 />
               )}
             </div>
