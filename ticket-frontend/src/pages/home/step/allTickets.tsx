@@ -1,8 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { api } from "../../../../lib/axios";
+import { RefreshCcw } from "lucide-react";
 
 interface AllTicketsModalProps{
   handleTicketSelection: (id: string) => void;
   cases: Cases[]
+  myTicketsFilter: boolean
+  openTicketFilter: boolean
+  closedTicketFilter: boolean
+  inProgressTicketFilter: boolean
+  onRefresh: () => Promise<void> | void
 }
 
 export interface Cases {
@@ -16,17 +23,56 @@ export interface Cases {
   company: string
   duration: string
   assignedUserName: string
+  assignedToId: String
 }
 
-export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModalProps) {
+export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter, openTicketFilter, closedTicketFilter, inProgressTicketFilter, onRefresh}: AllTicketsModalProps) {
   const [search, setSearch] = useState("")
+  const [userId, setUserId] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+      async function getUserId() {
+        try{
+          setUserId(null)
+          const response = await api.get("user/token");
+          setUserId(response.data.user.id)
+        } catch(error){
+          console.error('Erro', error)
+        } 
+      }
+      getUserId()
+    })
+
+    async function refreshCases() {
+      try {
+        setLoading(true)
+        await onRefresh()
+      } finally {
+        setLoading(false)
+      }
+    }
 
   const filteredCases = useMemo(() => {
-    return cases.filter(caso =>
+  return cases
+    .filter(caso =>
       caso.openedByName.toLowerCase().includes(search.toLowerCase()) ||
       caso.id.includes(search)
     )
-  }, [cases, search])
+    .filter(caso =>
+      !myTicketsFilter || caso.assignedToId === userId
+    )
+    .filter(caso =>
+      !openTicketFilter || caso.status === "OPEN"
+    )
+    .filter(caso =>
+      !closedTicketFilter || caso.status === "CLOSED"
+    )
+    .filter(caso =>
+      !inProgressTicketFilter || caso.status === "IN_PROGRESS"
+    )
+
+}, [cases, search, userId, myTicketsFilter, openTicketFilter, closedTicketFilter, inProgressTicketFilter])
 
   function getStatusStyle(status: string) {
     switch (status) {
@@ -47,7 +93,7 @@ export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModa
         return "bg-cyan-500/20 text-cyan-400"
       case "LOW":
         return "bg-green-500/20 text-green-400"
-      case "MEDIUM":
+      case "NORMAL":
         return "bg-yellow-500/20 text-yellow-300"
       case "HIGH":
         return "bg-red-500/20 text-red-300"
@@ -100,27 +146,38 @@ export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModa
 
   return (
     <div className="inset-0  flex items-center justify-center z-50">
-      <div className="w-275 max-h-[85vh] bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6">
+      <div className="w-full h-full bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold text-white">
             Todos os Tickets
           </h2>
 
-          <input
-            type="text"
-            placeholder="Buscar ticket..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-72 bg-zinc-800 text-zinc-200 px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-amber-500"
-          />
+          <div className="flex gap-2 w-fit">
+            <button
+              onClick={refreshCases}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2"
+            >
+              <span className={`${loading ? "animate-spin" : ""}`}>
+                <RefreshCcw className="size-5"/>
+              </span>
+            </button>
+
+            <input
+              type="text"
+              placeholder="Buscar ticket..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-72 bg-zinc-800 text-zinc-200 px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-amber-500"
+            />
+          </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
-          <StatCard title="Total" value={cases.length} />
-          <StatCard title="Abertos" value={cases.filter(c => c.status === "OPEN").length} />
-          <StatCard title="Em andamento" value={cases.filter(c => c.status === "IN_PROGRESS").length} />
-          <StatCard title="Fechados" value={cases.filter(c => c.status === "CLOSED").length} />
+          <StatCard title="Total" value={filteredCases.length} />
+          <StatCard title="Abertos" value={filteredCases.filter(c => c.status === "OPEN").length} />
+          <StatCard title="Em andamento" value={filteredCases.filter(c => c.status === "IN_PROGRESS").length} />
+          <StatCard title="Fechados" value={filteredCases.filter(c => c.status === "CLOSED").length} />
         </div>
 
         {/* Table */}
@@ -134,6 +191,7 @@ export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModa
                 <th className="p-4">Status</th>
                 <th className="p-4">Data</th>
                 <th className="p-4">Prioridade</th>
+                <th className="p-4">Responsável</th>
                 <th className="p-4"></th>
               </tr>
             </thead>
@@ -155,7 +213,7 @@ export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModa
                   </td>
 
                   <td className="p-4 text-zinc-400">
-                    {new Date(caso.created_at).toLocaleDateString()}
+                    {new Date(caso.created_at).toLocaleDateString('pt-BR')}
                   </td>
 
                   <td className="p-4">
@@ -164,10 +222,16 @@ export function AllTicketsModal({ handleTicketSelection, cases }: AllTicketsModa
                     </span>
                   </td>
 
+                  <td className="p-4">
+                    <span className={`p-4 text-white`}>
+                      {caso.assignedUserName}
+                    </span>
+                  </td>
+
                   <td className="p-4 text-right">
                     <button
                       onClick={() => handleTicketSelection(caso.id)}
-                      className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs transition"
+                      className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs transition cursor-pointer"
                     >
                       Selecionar
                     </button>

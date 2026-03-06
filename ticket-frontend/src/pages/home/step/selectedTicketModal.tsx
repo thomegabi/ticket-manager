@@ -12,6 +12,18 @@ interface SelectedTicketProps {
 export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedTicketProps) {
 
   const [ticket, setTicket] = useState<Cases | null>(null)
+  const [createdAt, setCreatedAt] = useState("")
+
+  function subtract6Hours(dateString: string) {
+    const date = new Date(dateString)
+    date.setHours(date.getHours() - 6) // POIS O TIMEZONE TEM ESSA DIFERENÇA
+    return date
+  }
+
+  function formatDatetimeLocal(dateString: string) {
+  const date = subtract6Hours(dateString)
+  return date.toISOString().slice(0,16)
+}
 
   async function updateTicket(event: FormEvent<HTMLFormElement>){
     event.preventDefault()
@@ -24,6 +36,10 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
     const priority = data.get('priority')?.toString()
     const company = data.get('company')?.toString()
 
+    const createdAtISO = createdAt ? new Date(createdAt).toISOString() : undefined
+
+    console.log(createdAt, 'AND', createdAtISO)
+
     try {
 
       const response = await api.put(`/update/${ticketId}`, {
@@ -31,10 +47,9 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
         status,
         duration,
         priority,
-        company
+        company,
+        created_at: createdAtISO
       })
-
-      console.log(response)
 
       const updatedTicket = response.data.updatedTicket
 
@@ -60,6 +75,11 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
         if (response.data.ticket) {
 
           const t = response.data.ticket
+
+          const created = new Date(t.created_at)
+          const createdFormatted = created.toISOString().slice(0,16)
+
+          setCreatedAt(createdFormatted)
 
           const formattedTicket: Cases = {
             ...t,
@@ -109,12 +129,16 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
           </span>
         </div>
 
-        <div className="text-right text-sm text-zinc-400 space-y-1">
+        <div className="text-right text-sm text-zinc-400 space-y-1 flex flex-col w-fit items-start pl-52">
           <div>
             Criado em:{" "}
-            <span className="text-white">
-              {new Date(ticket.created_at).toLocaleDateString()}
-            </span>
+            <input
+              type="datetime-local"
+              name="created_at"
+              value={createdAt ? formatDatetimeLocal(createdAt) : ""}
+              onChange={(e) => setCreatedAt(e.target.value)}
+              className="bg-zinc-800 text-white p-1 rounded"
+            />
           </div>
 
           {ticket.updated_at && (
@@ -129,7 +153,7 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
 
         <button
           onClick={onClose}
-          className="text-zinc-400 hover:text-white ml-4"
+          className="text-zinc-400 ml-4 cursor-pointer hover:text-red-700"
         >
           ✕
         </button>

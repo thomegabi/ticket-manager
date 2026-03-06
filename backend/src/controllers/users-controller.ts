@@ -68,6 +68,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     const adm = identifiedUser.isAdmin
 
+    const userId = identifiedUser.id
+
     // const isPasswordValid = await bcrypt.compare(password, identifiedUser.password);
     //   if (!isPasswordValid) {
     //     return res.status(401).send("Usuário não encontrado, verifique sua senha e usuario!")
@@ -81,7 +83,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       expiresIn: '24h', 
     });
 
-    return res.status(200).json({token, adm});
+    return res.status(200).json({token, adm, userId});
   } catch (error) {
     console.log('Logging in failed with following error: ', error)
     return res.status(500).send('Logging in failed, please try again later.');
@@ -116,8 +118,10 @@ export const signupByName= async (req: Request, res: Response, next: NextFunctio
       expiresIn: '24h', 
     });
 
+    const adm = createdUser.isAdmin
+    const userId = createdUser.id
 
-    return res.status(201).json({ token });
+    return res.status(201).json({ token, adm, userId });
   } catch (error) {
     console.error("An error ha occured during signup: ", error)
     return res.status(500).send('Signing up failed, please try again later.');
@@ -188,7 +192,7 @@ export const getUserWithToken = async(req: Request, res: Response, next: NextFun
       typeof value === 'bigint' ? value.toString() : value
     ));
   
-    return res.status(200).json({identifiedUserJson})
+    return res.status(200).json({user: identifiedUserJson})
   } catch(err){
     res.status(500).json(err)
   }

@@ -22,7 +22,24 @@ export const getCases = async (req: Request, res: Response, next: NextFunction):
       )
     );
 
-    return res.status(200).json({casesJson});
+    const casesWithUser = await Promise.all(
+      casesJson.map(async (caso: any) => {
+        let assignedUserName = "";
+
+        if (caso.assignedToId) {
+          const user = await userRepository.getUserById(caso.assignedToId);
+          assignedUserName = user?.name ?? "";
+        }
+
+        return {
+          ...caso,
+          assignedUserName
+        };
+      })
+    );
+
+    return res.status(200).json({ casesJson: casesWithUser });
+
   } catch (error) {
     console.log("Erro ao localizar usuários: ", error)
     return res.status(500).send('Fetching users failed, please try again later.'); 
@@ -77,7 +94,7 @@ export const createCase = async (req: Request, res: Response, next: NextFunction
     );
 
 
-    return res.status(201);
+    return res.status(201).send('Chamado aberto');
   } catch (error) {
     console.error("An error ha occured during signup: ", error)
     return res.status(500).send('Signing up failed, please try again later.');
@@ -86,10 +103,12 @@ export const createCase = async (req: Request, res: Response, next: NextFunction
 
 export const updateCase = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   let { caseId } = req.params
-  const { description, status, duration, priority, company } = req.body
+  const { description, status, duration, priority, company, created_at } = req.body
   const userId = req.userId
 
   caseId = caseId.toString()
+
+  console.log(created_at)
 
   try{
 
@@ -113,6 +132,7 @@ export const updateCase = async (req: Request, res: Response, next: NextFunction
         description: description ?? undefined,
         duration: duration ?? undefined,
         assignedToId: userId ?? undefined,
+        created_at: created_at ?? undefined
       })
     
     const updatedTicket = await caseRepository.getCaseById(caseId)

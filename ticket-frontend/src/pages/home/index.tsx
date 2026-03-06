@@ -8,42 +8,39 @@ import { api } from "../../../lib/axios";
 
 export function HomePage() {
   const navigate = useNavigate()
-  const [ isMyTicketsModalOpen, setMyTicketsModalOpen ] = useState(false)
+  const [ isMyTicketsFilterOn, setMyTicketsFilterOn ] = useState(false)
   const [ isAllTicketsModalOpen, setAllTicketsModalOpen ] = useState(false)
+  const [ isOpenTicketsFilterOn, setOpenTicketsFilterOn ] = useState(false)
+  const [ isClosedTicketsFilterOn, setClosedTicketsFilterOn ] = useState(false)
+  const [ isInProgressTicketsFilterOn, setInProgressTicketsFilterOn ] = useState(false)
   const [ selectedTicket, setSelectedTicket ] = useState<string | null>(null);
   const [ isNewTicketModalOpen, setNewTicketModalOpen ] = useState(false);
   const [ isSelectedTicketModalOpen, setSelectedTicketModalOpen ] = useState(false)
   const [ cases, setTickets ] = useState<Cases[]>([])
 
   useEffect(() => {
-    async function getCases() {
-      try {
-        const response = await api.get('/cases');
-
-        console.log(response)
-
-        if (response.data.casesJson) {
-          const formattedTickes = response.data.casesJson.map((caso: Cases) => ({
-            ...caso,
-            status: caso.status.toUpperCase()
-          }))
-
-          console.log(formattedTickes)
-
-          setTickets(formattedTickes)
-        } else {
-          setTickets([])
-        }
-      } catch (error) {
-        console.error(error)
-        setTickets([])
-      }
-    }
-
-    console.log(cases)
-
     getCases()
   }, [])
+
+  async function getCases() {
+    try {
+      const response = await api.get('/cases');
+
+      if (response.data.casesJson) {
+        const formattedTickes = response.data.casesJson.map((caso: Cases) => ({
+          ...caso,
+          status: caso.status.toUpperCase()
+        }))
+
+        setTickets(formattedTickes)
+      } else {
+        setTickets([])
+      }
+    } catch (error) {
+      console.error(error)
+      setTickets([])
+    }
+  }
 
   function handleTicketUpdated(updatedTicket: Cases) {
       if (updatedTicket && updatedTicket.id) {
@@ -73,14 +70,32 @@ export function HomePage() {
     setNewTicketModalOpen(false)
   }
   
-  function openMyTicketModal() {
-    closeAllModals()
-    setMyTicketsModalOpen(true);
+  function turnMyModalFilter() {
+    setMyTicketsFilterOn(!isMyTicketsFilterOn);
+  }
+  
+  function turnOpenTicketFilter() {
+    setClosedTicketsFilterOn(false)
+    setInProgressTicketsFilterOn(false)
+    setOpenTicketsFilterOn(!isOpenTicketsFilterOn);
+  }
+
+  function turnClosedTicketFilter() {
+    setOpenTicketsFilterOn(false)
+    setInProgressTicketsFilterOn(false)
+    setClosedTicketsFilterOn(!isClosedTicketsFilterOn);
+  }
+
+  function turnInProgressTicketFilter() {
+    setOpenTicketsFilterOn(false)
+    setClosedTicketsFilterOn(false);
+    setInProgressTicketsFilterOn(!isInProgressTicketsFilterOn)
   }
 
   function openAllTicketsModal() {
     closeAllModals()
     setAllTicketsModalOpen(true);
+    setMyTicketsFilterOn(false);
   }
 
   function handleTicketSelection(id: string) {
@@ -89,7 +104,6 @@ export function HomePage() {
   }
 
   function closeAllModals() {
-    setMyTicketsModalOpen(false);
     setAllTicketsModalOpen(false);
     setSelectedTicketModalOpen(false);
   }
@@ -102,7 +116,7 @@ export function HomePage() {
 
   return (
     <div className="font-orbitron min-h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
-      <div className="relative w-350 h-198 pt-4">
+      <div className="relative w-400 h-198 pt-4">
         <div className="flex items-center justify-between gap-32 pl-5 pb-4 z-10">
           <img className="w-64"  src="../../public/ticket_logo.png" alt="logo" />
           <p className="text-zinc-950 font-orbitron text-5xl h-37.5 flex items-center pr-40">
@@ -121,30 +135,48 @@ export function HomePage() {
         <div className="flex items-center z-10 gap-16">
           <div className="z-10 flex items-center">
             <div className="h-156.25 w-76.25 flex items-center z-10  flex-col gap-4 mb-3">
+
               <Button variant="primary" size="full" onClick={openAllTicketsModal}>
-                <p className="text-[32px] font-light">Tickets</p>
+                <p className="text-[24px] font-light">Tickets</p>
               </Button>
-              <Button variant="quaternary" size="full">
-                <p className="text-[32px] font-light">Meus Tickets</p>
+
+              <Button variant={isMyTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnMyModalFilter}>
+                <p className="text-[24px] font-light">Meus Tickets</p>
               </Button>
-              <Button variant="quaternary" size="full" onClick={openMyTicketModal}>
-                <p className="text-[32px] font-light">Tickets Abertos</p>
+
+              <Button variant={isOpenTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnOpenTicketFilter}>
+                <p className="text-[24px] font-light">Tickets Abertos</p>
               </Button>
+
+              <Button variant={isClosedTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnClosedTicketFilter}>
+                <p className="text-[24px] font-light">Tickets Fechados</p>
+              </Button>
+
+              <Button variant={isInProgressTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnInProgressTicketFilter}>
+                <p className="text-[24px] font-light">Tickets Em Progresso</p>
+              </Button>
+
               <Button variant="terciary" size="full" onClick={logout}>
-                <p className="text-[35px] font-light">Sair</p>
+                <p className="text-[24px] font-light">Sair</p>
               </Button>
+
             </div>
           </div>
 
           <div className="z-10 flex items-center">
-            <div className="w-260 h-156.25 border-2 border-sky-400 bg-white/60 z-10 mb-3 ">
+            <div className="w-308 h-156.25 border-2 border-sky-400 bg-white/60 z-10 mb-3 ">
               {isAllTicketsModalOpen && (
                 <AllTicketsModal
                   handleTicketSelection={handleTicketSelection}
                   cases={cases}
+                  myTicketsFilter={isMyTicketsFilterOn}
+                  openTicketFilter={isOpenTicketsFilterOn}
+                  closedTicketFilter={isClosedTicketsFilterOn}
+                  inProgressTicketFilter={isInProgressTicketsFilterOn}
+                  onRefresh={getCases}
                 />
               )}
-              {isNewTicketModalOpen && (
+              {isNewTicketModalOpen === true && (
                 <NewTicketModal
                   closeNewTicketModal={closeNewTicketModal}
                 />

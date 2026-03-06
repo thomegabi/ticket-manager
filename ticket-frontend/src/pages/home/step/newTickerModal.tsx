@@ -8,44 +8,66 @@ interface NewTicketModalProps {
 }
 
 export function NewTicketModal({ closeNewTicketModal}: NewTicketModalProps){
-const [ selectedCompany, setSelectedCompany ] = useState<string>('')
-const [ selectedPriority, setSelectedPriority ] = useState<string>('')
+const [ selectedCompany, setSelectedCompany ] = useState<string>('KIA')
+const [ selectedPriority, setSelectedPriority ] = useState<string>('VERY_LOW')
 const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
+const [loading, setLoading] = useState(false)
 
 
-  async function createTicket(event: FormEvent<HTMLFormElement>){
-    event.preventDefault()
-    setErrorHandler(null)
+  async function createTicket(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault()
 
-    const data = new FormData(event.currentTarget)    
-    const description = data.get('description')?.toString()
-    const openedByName = data.get('openedByName')?.toString()
+  if (loading) return
 
-    if(!description?.trim()){
-      setErrorHandler('Descreva o seu problema')
-      return
-    }
+  setLoading(true)
+  setErrorHandler(null)
 
-    if(!openedByName?.trim()){
-      setErrorHandler('Usuario não identificado')
-      return
-    }
+  const data = new FormData(event.currentTarget)
 
-    try{
-      await api.post('/cases/create', {
-        openedByName,
-        company: selectedCompany,
-        priority: selectedPriority,
-        description
-      })
+  const description = data.get('description')?.toString()
+  const openedByName = data.get('openedByName')?.toString()
 
-      closeNewTicketModal
-      closeNewTicketModal()
-    
-    }catch(err){
-      console.log('Erro:', err)
-    }
+  if(!description?.trim()){
+    setErrorHandler('Descreva o seu problema')
+    setLoading(false)
+    return
   }
+
+  if(!openedByName?.trim()){
+    setErrorHandler('Usuario não identificado')
+    setLoading(false)
+    return
+  }
+
+  if(!selectedCompany?.trim()){
+    setErrorHandler('Selecione uma empresa')
+    setLoading(false)
+    return
+  }
+
+  if(!selectedPriority?.trim()){
+    setErrorHandler('Selecione uma prioridade valida')
+    setLoading(false)
+    return
+  }
+
+  try{
+    await api.post('/cases/create', {
+      openedByName,
+      company: selectedCompany,
+      priority: selectedPriority,
+      description
+    })
+
+    closeNewTicketModal()
+   
+
+  } catch(err){
+    console.log('Erro:', err)
+  } finally {
+    setLoading(false)
+  }
+}
 
 
 
@@ -54,9 +76,9 @@ const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
       <div className="w-160 rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold flex-col w-full text-center text-zinc-50">Abertura de Chamado</h2>
+            <h2 className="text-lg font-semibold flex-col w-full text-center text-zinc-50 ">Abertura de Chamado</h2>
             <button type="button" onClick={closeNewTicketModal}>
-              <X className="size-5 text-zinc-400"/>
+              <X className="size-5 text-zinc-400 cursor-pointer hover:text-red-700"/>
             </button>
           </div>
           <p className="text-zinc-50 text-sm">
@@ -97,7 +119,7 @@ const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
           <div className="h-14 text-zinc-50 rounded-lg flex items-center gap-2.5 justify-between w-full">
             <div className="h-14 px-5 bg-zinc-950 w-72 text-zinc-50 rounded-lg flex items-center gap-2.5">
               <Building className="text-zinc-400 size-5"/>
-              <select name="company" className="p-1 outline-none w-full bg-black h-9 rounded-md text-zinc-50 border-zinc-950 border" onChange={(e) => setSelectedCompany(e.target.value)}>
+              <select name="company" className="p-1 outline-none w-full bg-black h-9 rounded-md text-zinc-50 border-zinc-950 border cursor-pointer" onChange={(e) => setSelectedCompany(e.target.value)}>
                 <option value="" disabled>
                   Empresa
                 </option>
@@ -110,13 +132,13 @@ const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
 
             <div className="h-14 px-5 bg-zinc-950 w-72 text-zinc-50 rounded-lg flex items-center gap-2.5">
               <CircleAlert className="text-zinc-400 size-5"/>
-              <select name="priority" className="p-1 outline-none w-full bg-black h-9 rounded-md text-zinc-50 border-zinc-950 border" onChange={(e) => setSelectedPriority(e.target.value)}>
+              <select name="priority" className="p-1 outline-none w-full bg-black h-9 rounded-md text-zinc-50 border-zinc-950 border cursor-pointer" onChange={(e) => setSelectedPriority(e.target.value)}>
                 <option value="" disabled>
                   Qual a prioridade?
                 </option> 
                 <option value="VERY_LOW">Muito Baixa</option>
                 <option value="LOW">Baixa</option>
-                <option value="MEDIUM">Media</option>
+                <option value="NORMAL">Media</option>
                 <option value="HIGH">Alta</option>
                 <option value="VERY_HIGH">Muito Alta</option>
               </select>
@@ -127,8 +149,8 @@ const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
             <p className="text-rose-700 font-light justify-center text-center text-sm">*{errorHandler}*</p>
           )}
 
-          <Button type="submit" variant="primary" size="full">
-            Gerar
+          <Button variant="primary" size="full" disabled={loading}>
+            {loading ? "Criando..." : "Gerar"}
           </Button>
         </form>
       </div>
