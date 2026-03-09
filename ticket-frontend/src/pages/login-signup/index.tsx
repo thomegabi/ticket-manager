@@ -31,7 +31,7 @@ export function LoginSignupPage(){
     <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
       <div className="max-w-[625px] space-y-4 w-full px-6 text-center justify-items-center">
         <div className="flex flex-col items-center justify-center gap-3">
-          <img src="/Logo_Ticket.png" alt="Ticket Logo" />
+          <img src="/ticket_nv.png" alt="Ticket Logo" />
         </div>
         <div className="flex items-center flex-col w-96 justify-center gap-3">
         

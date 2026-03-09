@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../../lib/axios";
-import { RefreshCcw } from "lucide-react";
+import { CalendarCheck2, CalendarSearch, RefreshCcw } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { DateStep } from "./dateSelectionModal";
+
 
 interface AllTicketsModalProps{
   handleTicketSelection: (id: string) => void;
@@ -30,6 +33,21 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   const [search, setSearch] = useState("")
   const [userId, setUserId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [ isSelectDateOpen, setSelectDateOpen ] = useState(false)
+  const [ selectedDateFilter, setSelectedDateFilter ] = useState<DateRange | undefined>(undefined)
+
+  function openSelectDate(){
+    setSelectDateOpen(true)
+  }
+
+  function closeSelectDate(){
+    setSelectDateOpen(false)
+    setSelectedDateFilter(undefined)
+  }
+
+  function closeSelectDateWithDate(){
+    setSelectDateOpen(false)
+  }
 
   useEffect(() => {
       async function getUserId() {
@@ -42,26 +60,33 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
         } 
       }
       getUserId()
-    })
+    }, [])
 
-    async function refreshCases() {
-      try {
-        setLoading(true)
-        await onRefresh()
-      } finally {
-        setLoading(false)
-      }
+  async function refreshCases() {
+    if (loading) return
+    
+    try {
+      setLoading(true)
+      await onRefresh()
+    } finally {
+      setLoading(false)
     }
+  }
 
   const filteredCases = useMemo(() => {
   return cases
+    // busca
     .filter(caso =>
       caso.openedByName.toLowerCase().includes(search.toLowerCase()) ||
       caso.id.includes(search)
     )
+
+    // meus tickets
     .filter(caso =>
       !myTicketsFilter || caso.assignedToId === userId
     )
+
+    // status
     .filter(caso =>
       !openTicketFilter || caso.status === "OPEN"
     )
@@ -72,7 +97,39 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
       !inProgressTicketFilter || caso.status === "IN_PROGRESS"
     )
 
-}, [cases, search, userId, myTicketsFilter, openTicketFilter, closedTicketFilter, inProgressTicketFilter])
+    // filtro de data (day-picker)
+    .filter(caso => {
+      if (!selectedDateFilter?.from && !selectedDateFilter?.to) return true
+
+      const caseDate = new Date(caso.created_at)
+
+      if (selectedDateFilter?.from) {
+        const from = new Date(selectedDateFilter.from)
+        from.setHours(0, 0, 0, 0)
+
+        if (caseDate < from) return false
+      }
+
+      if (selectedDateFilter?.to) {
+        const to = new Date(selectedDateFilter.to)
+        to.setHours(23, 59, 59, 999)
+
+        if (caseDate > to) return false
+      }
+
+      return true
+    })
+
+}, [
+  cases,
+  search,
+  userId,
+  myTicketsFilter,
+  openTicketFilter,
+  closedTicketFilter,
+  inProgressTicketFilter,
+  selectedDateFilter
+])
 
   function getStatusStyle(status: string) {
     switch (status) {
@@ -145,11 +202,11 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   }
 
   return (
-    <div className="inset-0  flex items-center justify-center z-50">
-      <div className="w-full h-full bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6">
+    <div className="inset-0  flex items-center justify-center z-50 ">
+      <div className="w-full h-full bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6 rounded-2xl">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold text-white">
-            Todos os Tickets
+            Tickets
           </h2>
 
           <div className="flex gap-2 w-fit">
@@ -160,6 +217,14 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
               <span className={`${loading ? "animate-spin" : ""}`}>
                 <RefreshCcw className="size-5"/>
               </span>
+            </button>
+
+            <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2" onClick={openSelectDate}>
+              {selectedDateFilter !== undefined ? (
+                <CalendarCheck2 className="size-5 text-sky-400"/>
+              ) : (
+                <CalendarSearch className="size-5"/>
+              )}
             </button>
 
             <input
@@ -243,6 +308,13 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
         </div>
 
       </div>
+      {isSelectDateOpen && (
+        <DateStep 
+          closeSelectDate={closeSelectDate}
+          selectedDate={setSelectedDateFilter}
+          closeSelectDateWithDate={closeSelectDateWithDate}
+        />
+      )}
     </div>
   )
 }

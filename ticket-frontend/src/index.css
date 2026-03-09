@@ -16,3 +16,16 @@
 @utility bg-pattern {
   background-image: url("/bg.png");
 }
+
+* {
+  min-width: 0;
+}
+
+input {
+  color-scheme: dark;
+}
+
+.rdp-root {
+  --rdp-accent-color: green;
+  --rdp-accent-background-color: rgb(4, 215, 4);
+}

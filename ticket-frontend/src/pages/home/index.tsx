@@ -119,7 +119,7 @@ export function HomePage() {
       <div className="relative w-400 h-198 pt-4">
         <div className="flex items-center justify-between gap-32 pl-5 pb-4 z-10">
           <img className="w-64"  src="../../public/ticket_logo.png" alt="logo" />
-          <p className="text-zinc-950 font-orbitron text-5xl h-37.5 flex items-center pr-40">
+          <p className="text-zinc-50 font-orbitron text-5xl h-37.5 flex items-center pr-40">
             Ticket System
           </p>
 
@@ -134,37 +134,47 @@ export function HomePage() {
 
         <div className="flex items-center z-10 gap-16">
           <div className="z-10 flex items-center">
-            <div className="h-156.25 w-76.25 flex items-center z-10  flex-col gap-4 mb-3">
+            <div className="h-156.25 w-76.25 flex items-center z-10  flex-col gap-4">
 
               <Button variant="primary" size="full" onClick={openAllTicketsModal}>
                 <p className="text-[24px] font-light">Tickets</p>
               </Button>
 
-              <Button variant={isMyTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnMyModalFilter}>
-                <p className="text-[24px] font-light">Meus Tickets</p>
-              </Button>
+              <div className="relative flex-col gap-4 flex items-center">
+                <div className="w-[150px] h-px bg-zinc-50 absolute"/>
+              </div>
 
-              <Button variant={isOpenTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnOpenTicketFilter}>
-                <p className="text-[24px] font-light">Tickets Abertos</p>
-              </Button>
+              <div className="flex-col gap-4 flex items-center">
+                <Button variant={isMyTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnMyModalFilter}>
+                  <p className="text-[24px] font-light">Meus Tickets</p>
+                </Button>
 
-              <Button variant={isClosedTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnClosedTicketFilter}>
-                <p className="text-[24px] font-light">Tickets Fechados</p>
-              </Button>
+                <Button variant={isOpenTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnOpenTicketFilter}>
+                  <p className="text-[24px] font-light">Tickets Abertos</p>
+                </Button>
 
-              <Button variant={isInProgressTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnInProgressTicketFilter}>
-                <p className="text-[24px] font-light">Tickets Em Progresso</p>
-              </Button>
+                <Button variant={isClosedTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnClosedTicketFilter}>
+                  <p className="text-[24px] font-light">Tickets Fechados</p>
+                </Button>
 
-              <Button variant="terciary" size="full" onClick={logout}>
-                <p className="text-[24px] font-light">Sair</p>
-              </Button>
+                <Button variant={isInProgressTicketsFilterOn ? "primary" : "quaternary"} size="full" onClick={turnInProgressTicketFilter}>
+                  <p className="text-[24px] font-light">Tickets Em Progresso</p>
+                </Button>
+              </div>
+
+                <div className="relative flex-col gap-4 flex items-center">
+                  <div className="w-[150px] h-px bg-zinc-50 absolute"/>
+                </div>
+
+                <Button variant="terciary" size="full" onClick={logout}>
+                  <p className="text-[24px] font-light">Sair</p>
+                </Button>
 
             </div>
           </div>
 
           <div className="z-10 flex items-center">
-            <div className="w-308 h-156.25 border-2 border-sky-400 bg-white/60 z-10 mb-3 ">
+            <div className="w-308 h-156.25 rounded-full">
               {isAllTicketsModalOpen && (
                 <AllTicketsModal
                   handleTicketSelection={handleTicketSelection}

@@ -36,8 +36,6 @@ export function LoginModal({ closeLoginModal}: LoginModalProps){
 
        sessionStorage.setItem('token', response.data.token)
 
-       console.log(response)
-
       navigate('/home')
     
     }catch{
