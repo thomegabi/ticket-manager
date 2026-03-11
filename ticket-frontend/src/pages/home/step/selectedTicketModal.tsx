@@ -32,13 +32,11 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
 
     const status = data.get('status')?.toString()
     const description = data.get('description')?.toString()
-    const duration = data.get('duration')?.toString()
+    const duration = Number(data.get('duration'))
     const priority = data.get('priority')?.toString()
     const company = data.get('company')?.toString()
 
     const createdAtISO = createdAt ? new Date(createdAt).toISOString() : undefined
-
-    console.log(createdAt, 'AND', createdAtISO)
 
     try {
 
@@ -224,12 +222,18 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-zinc-400 text-sm">Duração</span>
+            <span className="text-zinc-400 text-sm">Duração (minutos)</span>
 
             <input
               name="duration"
+              placeholder="Coloque a duração em minutos"
+              type="text"
+              inputMode="numeric"
               defaultValue={ticket.duration}
               className="bg-zinc-800 text-white p-2 rounded-lg"
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/\D/g, "")
+              }}
             />
           </div>
 

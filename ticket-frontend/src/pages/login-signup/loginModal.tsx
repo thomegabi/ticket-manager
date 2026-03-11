@@ -24,8 +24,6 @@ export function LoginModal({ closeLoginModal}: LoginModalProps){
     const name = data.get('name')?.toString()
     const password = data.get('password')?.toString()
 
-    console.log(name, password)
-
     try{
       const response = await api.post('/login', {
         name,

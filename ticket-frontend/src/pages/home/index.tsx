@@ -27,12 +27,17 @@ export function HomePage() {
       const response = await api.get('/cases');
 
       if (response.data.casesJson) {
-        const formattedTickes = response.data.casesJson.map((caso: Cases) => ({
+        const formattedTickets = response.data.casesJson.map((caso: Cases) => ({
           ...caso,
           status: caso.status.toUpperCase()
         }))
 
-        setTickets(formattedTickes)
+        formattedTickets.sort(
+          (a: any, b: any) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+
+        setTickets(formattedTickets)
       } else {
         setTickets([])
       }

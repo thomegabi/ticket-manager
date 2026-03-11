@@ -22,8 +22,6 @@ export function SignUpModal({ closeSignUpModal }: SignUpModalProps){
     const name = data.get('name')?.toString()
     const password = data.get('password')?.toString()
 
-    console.log(password, name)
-
     try{
       const response = await api.post('/signup', {
         name,

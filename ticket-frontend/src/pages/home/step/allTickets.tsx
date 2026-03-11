@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../../../lib/axios";
-import { CalendarCheck2, CalendarSearch, RefreshCcw } from "lucide-react";
+import { CalendarCheck2, CalendarSearch, PcCase, RefreshCcw } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { DateStep } from "./dateSelectionModal";
+import { ReportModal } from "./durationReportModal";
 
 
 interface AllTicketsModalProps{
@@ -24,7 +25,7 @@ export interface Cases {
   created_at: Date
   updated_at: Date
   company: string
-  duration: string
+  duration: number
   assignedUserName: string
   assignedToId: String
 }
@@ -34,7 +35,16 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   const [userId, setUserId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [ isSelectDateOpen, setSelectDateOpen ] = useState(false)
+  const [ isReportModalOpen, setReportModalOpen] = useState(false)
   const [ selectedDateFilter, setSelectedDateFilter ] = useState<DateRange | undefined>(undefined)
+
+  function closeReportModal(){
+    setReportModalOpen(false)
+  }
+
+  function openReportModal() {
+    setReportModalOpen(true);
+  }
 
   function openSelectDate(){
     setSelectDateOpen(true)
@@ -211,9 +221,16 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
 
           <div className="flex gap-2 w-fit">
             <button
+              onClick={openReportModal}
+              className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2">
+              <span>
+                <PcCase className="size-5"/>
+              </span>
+            </button>
+
+            <button
               onClick={refreshCases}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2"
-            >
+              className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2">
               <span className={`${loading ? "animate-spin" : ""}`}>
                 <RefreshCcw className="size-5"/>
               </span>
@@ -313,6 +330,13 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
           closeSelectDate={closeSelectDate}
           selectedDate={setSelectedDateFilter}
           closeSelectDateWithDate={closeSelectDateWithDate}
+        />
+      )}
+
+      {isReportModalOpen && (
+        <ReportModal
+          onClose={closeReportModal}
+          selectedDateFilter={selectedDateFilter}
         />
       )}
     </div>
