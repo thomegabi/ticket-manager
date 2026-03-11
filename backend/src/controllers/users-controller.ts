@@ -133,8 +133,6 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
   const { password } = req.body
   let { updatedUserId } = req.body
 
-  console.log('updated: ', updatedUserId)
-
   if(updatedUserId === 'no'){
     updatedUserId = userId
   }

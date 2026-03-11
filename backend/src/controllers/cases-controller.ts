@@ -77,6 +77,39 @@ export const getCasesById = async (req: Request, res: Response, next: NextFuncti
   }
 }
 
+export const getDurationReport = async (req: Request, res: Response): Promise<Response> => {
+  try {
+
+    const { startDate, endDate } = req.query as {
+      startDate?: string
+      endDate?: string
+    }
+
+    let userId = req.userId
+    userId = userId?.toString()
+
+    if (!userId) {
+      return res.status(403).send('Usuario não identificado. Acesso negado')
+    }
+
+    const report = await caseRepository.getDurationReport(
+      userId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined
+    )
+
+    return res.status(200).json(report)
+
+  } catch (error) {
+
+    console.error("Erro ao gerar relatório:", error)
+
+    return res.status(500).json({
+      message: "Erro ao gerar relatório"
+    })
+  }
+}
+
 export const createCase = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -107,8 +140,6 @@ export const updateCase = async (req: Request, res: Response, next: NextFunction
   const userId = req.userId
 
   caseId = caseId.toString()
-
-  console.log(created_at)
 
   try{
 

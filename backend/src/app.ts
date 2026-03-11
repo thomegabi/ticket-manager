@@ -7,6 +7,10 @@ import dotenv from 'dotenv';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
+//jobs
+import './jobs/backupJob'
+import './jobs/eraseOldBackups'
+
 //Localização das rotas da aplicação
 import usersRoutes from './routes/users-routes';
 import casesRoutes from './routes/cases-routes';

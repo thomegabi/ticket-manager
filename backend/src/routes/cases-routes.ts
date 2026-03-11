@@ -10,6 +10,8 @@ router.get('/cases', casesController.getCases);
 
 router.get('/case/:caseId', casesController.getCasesById)
 
+router.get('/cases/report', verifyToken, casesController.getDurationReport)
+
 router.post('/cases/create', casesController.createCase);
 
 router.put('/update/:caseId', verifyToken, casesController.updateCase)
