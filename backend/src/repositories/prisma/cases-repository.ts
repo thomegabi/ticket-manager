@@ -52,34 +52,59 @@ export class CaseRepository {
     return prisma.case.findMany();
   }
 
-  async getDurationReport(userId: string, startDate?: Date, endDate?: Date) {
+async getDurationReport(userId: string, startDate?: Date, endDate?: Date) {
 
-    if (startDate) {
-      startDate.setHours(0, 0, 0, 0)
+  if (startDate) startDate.setHours(0,0,0,0)
+  if (endDate) endDate.setHours(23,59,59,999)
+
+  const tickets = await prisma.case.findMany({
+    where: {
+      assignedToId: userId,
+      status: "CLOSED",
+      created_at: {
+        gte: startDate,
+        lte: endDate
+      }
+    },
+    select: {
+      created_at: true,
+      duration: true
     }
+  })
 
-    if (endDate) {
-      endDate.setHours(23, 59, 59, 999)
-    }
+  const totalTickets = tickets.length
 
-    const report = await prisma.case.aggregate({
-      where: {
-        assignedToId: userId,
-        status: "CLOSED",
-        created_at: {
-          gte: startDate,
-          lte: endDate
-        }
-      },
-      _count: { id: true },
-      _sum: { duration: true },
-      _avg: { duration: true }
-    })
+  const totalDuration = tickets.reduce((sum, ticket) => {
+    return sum + (ticket.duration ?? 0)
+  }, 0)
 
-    return {
-      totalTickets: report._count.id ?? 0,
-      totalDuration: report._sum.duration ?? 0,
-      averageDuration: Math.round(report._avg.duration ?? 0)
-    }
+  const averageDuration =
+    totalTickets > 0
+      ? Math.round(totalDuration / totalTickets)
+      : 0
+
+  const ticketsPerDay: Record<string, number> = {}
+
+  tickets.forEach(ticket => {
+
+    const date = ticket.created_at
+      .toISOString()
+      .split("T")[0]
+
+    ticketsPerDay[date] = (ticketsPerDay[date] || 0) + 1
+
+  })
+
+  const chartData = Object.entries(ticketsPerDay).map(([date, count]) => ({
+    date,
+    tickets: count
+  }))
+
+  return {
+    totalTickets,
+    totalDuration,
+    averageDuration,
+    chartData
   }
+}
 }
