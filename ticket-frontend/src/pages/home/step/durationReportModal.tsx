@@ -85,7 +85,7 @@ export function ReportModal({ selectedDateFilter, onClose }: ReportModalProps) {
     >
 
       <div
-        className="bg-zinc-900 border border-zinc-800 p-7 rounded-xl w-[520px] space-y-6 shadow-xl"
+        className="bg-zinc-900 border border-zinc-800 p-7 rounded-xl w-130 space-y-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
 

@@ -123,7 +123,7 @@ export function HomePage() {
     <div className="font-orbitron min-h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
       <div className="relative w-400 h-198 pt-4">
         <div className="flex items-center justify-between gap-32 pl-5 pb-4 z-10">
-          <img className="w-64"  src="../../public/ticket_logo.png" alt="logo" />
+          <img className="w-64"  src="/ticket_logo.png" alt="logo" />
           <p className="text-zinc-50 font-orbitron text-5xl h-37.5 flex items-center pr-40">
             Ticket System
           </p>
@@ -146,7 +146,7 @@ export function HomePage() {
               </Button>
 
               <div className="relative flex-col gap-4 flex items-center">
-                <div className="w-[150px] h-px bg-zinc-50 absolute"/>
+                <div className="w-37.5 h-px bg-zinc-50 absolute"/>
               </div>
 
               <div className="flex-col gap-4 flex items-center">
@@ -168,7 +168,7 @@ export function HomePage() {
               </div>
 
                 <div className="relative flex-col gap-4 flex items-center">
-                  <div className="w-[150px] h-px bg-zinc-50 absolute"/>
+                  <div className="w-37.5 h-px bg-zinc-50 absolute"/>
                 </div>
 
                 <Button variant="terciary" size="full" onClick={logout}>

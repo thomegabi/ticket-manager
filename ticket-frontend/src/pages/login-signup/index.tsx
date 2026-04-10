@@ -29,7 +29,7 @@ export function LoginSignupPage(){
 
   return (
     <div className="h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
-      <div className="max-w-[625px] space-y-4 w-full px-6 text-center justify-items-center">
+      <div className="max-w-156.25 space-y-4 w-full px-6 text-center justify-items-center">
         <div className="flex flex-col items-center justify-center gap-3">
           <img src="/ticket_nv.png" alt="Ticket Logo" />
         </div>

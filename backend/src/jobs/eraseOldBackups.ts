@@ -1,34 +1,49 @@
-import { exec } from 'child_process';
 import cron from 'node-cron';
 import path from 'path';
+import fs from 'fs';
 
 const BACKUP_DIR = path.resolve(__dirname, "../../backups");
 
-const runCommand = (command: string) => {
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Erro ao executar o backup: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.warn(`Aviso: ${stderr}`);
-    }
-    console.log(`Backup concluído: ${stdout}`);
-  });
-};
+// Garante que a pasta existe
+if (!fs.existsSync(BACKUP_DIR)) {
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+}
 
-cron.schedule("0 10 * * *", () => {
-  console.log("Limpando backups antigos...");
+function deleteOldBackups(days: number) {
+  const now = Date.now();
+  const maxAge = days * 24 * 60 * 60 * 1000;
 
   try {
+    const files = fs.readdirSync(BACKUP_DIR);
 
-    const cleanCommand = `
-      find ${BACKUP_DIR} -type f -mtime +7 -name "backup_*.sql" -delete; 
-      find ${BACKUP_DIR} -type f -mtime +7 -name "backup_*.dump" -delete;`;
-    runCommand(cleanCommand);
+    files.forEach((file) => {
+      // Filtra apenas .sql e .dump com prefixo backup_
+      if (
+        !file.startsWith("backup_") ||
+        (!file.endsWith(".sql") && !file.endsWith(".dump"))
+      ) {
+        return;
+      }
 
-    console.log("Backups antigos removidos com sucesso.");
+      const filePath = path.join(BACKUP_DIR, file);
+      const stats = fs.statSync(filePath);
+
+      const fileAge = now - stats.mtime.getTime();
+
+      if (fileAge > maxAge) {
+        fs.unlinkSync(filePath);
+        console.log(`Removido: ${file}`);
+      }
+    });
+
+    console.log("Limpeza concluída.");
   } catch (err) {
-    console.error("Erro ao remover backups antigos:", err);
+    console.error("Erro ao limpar backups:", err);
   }
+}
+
+// Roda todo dia às 10:00
+cron.schedule("0 10 * * *", () => {
+  console.log("Limpando backups antigos...");
+  deleteOldBackups(7);
 });
