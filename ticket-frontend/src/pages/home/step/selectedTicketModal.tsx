@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useContext, useEffect, useState, type FormEvent } from "react";
 import { api } from "../../../../../ticket-frontend/lib/axios";
 import type { Cases } from "./allTickets";
 import { Button } from "../../../components/button";
+import { AuthContext } from "../../../../context/authContext";
 
 interface SelectedTicketProps {
   ticketId: string | null
@@ -10,7 +11,7 @@ interface SelectedTicketProps {
 }
 
 export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedTicketProps) {
-
+  const { isAdmin } = useContext(AuthContext)
   const [ticket, setTicket] = useState<Cases | null>(null)
   const [createdAt, setCreatedAt] = useState("")
 
@@ -119,7 +120,7 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
 
         <div>
           <h2 className="text-xl font-semibold text-white">
-            Editar Ticket
+            Ticket {ticket.id.slice(0,8)}
           </h2>
 
           <span className="text-zinc-500 text-sm">
@@ -179,22 +180,29 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
           <div className="flex flex-col gap-2">
             <span className="text-zinc-400 text-sm">Empresa</span>
 
-            <select
-              name="company"
-              defaultValue={ticket.company}
-              className="bg-zinc-800 text-white p-2 rounded-lg"
-            >
-              <option value="FORD_CHAPECO">Ford Chapecó</option>
-              <option value="FORD_XANXERE">Ford Xanxerê</option>
-              <option value="LOCALIZA">Localiza</option>
-              <option value="KIA">KIA</option>
-            </select>
+            {isAdmin ? (
+              <select
+                name="company"
+                defaultValue={ticket.company}
+                className="bg-zinc-800 text-white p-2 rounded-lg"
+              >
+                <option value="FORD_CHAPECO">Ford Chapecó</option>
+                <option value="FORD_XANXERE">Ford Xanxerê</option>
+                <option value="LOCALIZA">Localiza</option>
+                <option value="KIA">KIA</option>
+              </select>
+            ) : (
+              <div className="bg-zinc-800 text-white p-2 rounded-lg">
+                {ticket.company}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-zinc-400 text-sm">Status</span>
 
-            <select
+            {isAdmin ? (
+              <select
               name="status"
               defaultValue={ticket.status}
               className="bg-zinc-800 text-white p-2 rounded-lg"
@@ -203,12 +211,20 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
               <option value="IN_PROGRESS">Em andamento</option>
               <option value="CLOSED">Fechado</option>
             </select>
+            ) : (
+              <div className="bg-zinc-800 text-white p-2 rounded-lg">
+                {ticket.status === "OPEN" && "Aberto"}
+                {ticket.status === "IN_PROGRESS" && "Em andamento"}
+                {ticket.status === "CLOSED" && "Fechado"}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-zinc-400 text-sm">Prioridade</span>
 
-            <select
+            {isAdmin ? (
+              <select
               name="priority"
               defaultValue={ticket.priority}
               className="bg-zinc-800 text-white p-2 rounded-lg"
@@ -219,12 +235,22 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
               <option value="HIGH">Alta</option>
               <option value="VERY_HIGH">Muito alta</option>
             </select>
+            ) : (
+              <div className="bg-zinc-800 text-white p-2 rounded-lg">
+                {ticket.priority === "VERY_LOW" && "Muito baixa"}
+                {ticket.priority === "LOW" && "Baixa"}
+                {ticket.priority === "NORMAL" && "Normal"}
+                {ticket.priority === "HIGH" && "Alta"}
+                {ticket.priority === "VERY_HIGH" && "Muito alta"}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-zinc-400 text-sm">Duração (minutos)</span>
 
-            <input
+            {isAdmin ? (
+              <input
               name="duration"
               placeholder="Coloque a duração em minutos"
               type="text"
@@ -235,6 +261,11 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
                 e.target.value = e.target.value.replace(/\D/g, "")
               }}
             />
+            ) : (
+              <div className="bg-zinc-800 text-white p-2 rounded-lg">
+                {ticket.duration ?? "Não definida"}
+              </div>
+            )}
           </div>
 
         </div>
@@ -242,11 +273,17 @@ export function SelectedTicket({ ticketId, onClose, onTicketUpdated }: SelectedT
         <div className="flex flex-col gap-2">
           <span className="text-zinc-400 text-sm">Descrição</span>
 
-          <textarea
+          {isAdmin ? (
+            <textarea
             name="description"
             defaultValue={ticket.description}
             className="bg-zinc-800 text-white p-3 rounded-lg h-32 resize-none"
           />
+          ) : (
+            <div className="bg-zinc-800 text-white p-3 rounded-lg h-32 overflow-y-auto">
+              {ticket.description}
+            </div>
+          )}
         </div>
 
         <Button type="submit" variant="primary" size="full">

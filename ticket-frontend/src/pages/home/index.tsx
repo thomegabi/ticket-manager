@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "../../components/button";
 import { useNavigate } from "react-router-dom";
 import { AllTicketsModal, type Cases } from "./step/allTickets";
 import { NewTicketModal } from "./step/newTickerModal";
 import { SelectedTicket } from "./step/selectedTicketModal";
 import { api } from "../../../lib/axios";
+import { AuthContext } from "../../../context/authContext";
 
 export function HomePage() {
   const navigate = useNavigate()
+  const { isAdmin } = useContext(AuthContext)
   const [ isMyTicketsFilterOn, setMyTicketsFilterOn ] = useState(false)
   const [ isAllTicketsModalOpen, setAllTicketsModalOpen ] = useState(false)
   const [ isOpenTicketsFilterOn, setOpenTicketsFilterOn ] = useState(false)
@@ -24,26 +26,31 @@ export function HomePage() {
 
   async function getCases() {
     try {
-      const response = await api.get('/cases');
+      const endpoint = isAdmin ? '/cases' : '/cases/myCases';
 
-      if (response.data.casesJson) {
-        const formattedTickets = response.data.casesJson.map((caso: Cases) => ({
-          ...caso,
-          status: caso.status.toUpperCase()
-        }))
+      const response = await api.get(endpoint);
 
-        formattedTickets.sort(
-          (a: any, b: any) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )
+      const cases = response.data?.casesJson;
 
-        setTickets(formattedTickets)
+      if (cases) {
+        const formattedTickets = cases
+          .map((caso: Cases) => ({
+            ...caso,
+            status: caso.status.toUpperCase(),
+          }))
+          .sort(
+            (a: Cases, b: Cases) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
+
+        setTickets(formattedTickets);
       } else {
-        setTickets([])
+        setTickets([]);
       }
     } catch (error) {
-      console.error(error)
-      setTickets([])
+      console.error(error);
+      setTickets([]);
     }
   }
 

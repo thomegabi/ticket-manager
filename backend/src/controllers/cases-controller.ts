@@ -46,6 +46,29 @@ export const getCases = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
+export const getMyCases = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
+  const userId = req.userId
+
+  if(!userId){
+    return res.status(403).send('Usuario não identificado. Acesso negado')
+  }
+  const cases = await caseRepository.getUserByOpenerUser(userId);
+
+  if (!cases) {
+    return res.status(404).json({ message: "Nenhum chamado encontrado para este usuário" })
+  }
+
+  const sortedCases = cases.sort((a: any, b: any) => b.createdAt - a.createdAt);
+
+  const casesJson = JSON.parse(
+    JSON.stringify(sortedCases, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    )
+  );
+
+  return res.status(200).json({ casesJson });
+};
+
 export const getCasesById = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
   let { caseId } = req.params
   caseId = caseId.toString()
@@ -112,18 +135,28 @@ export const getDurationReport = async (req: Request, res: Response): Promise<Re
 
 export const createCase = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
   const errors = validationResult(req);
+  const userId = req.userId
   if (!errors.isEmpty()) {
     return res.status(422).send("Invalid Input detected, please verify your data");
   }
 
-  const { openedByName, company, priority, description, assignedToId} = req.body;
+  const user = await userRepository.getUserById(userId?.toString() ?? "")
+
+  if (!user) {
+    return res.status(403).send('User not identified. Access denied.')
+  }
+  const openedById = userId?.toString()
+  const openedByName = user.name
+
+  const { company, priority, description, assignedToId} = req.body;
 
   try {
     await caseRepository.createCase(
       openedByName,
       company,
       priority,
-      description
+      description,
+      openedById
     );
 
 

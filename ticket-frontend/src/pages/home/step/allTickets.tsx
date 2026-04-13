@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { api } from "../../../../lib/axios";
 import { CalendarCheck2, CalendarSearch, PcCase, RefreshCcw } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { DateStep } from "./dateSelectionModal";
 import { ReportModal } from "./durationReportModal";
+import { AuthContext } from "../../../../context/authContext";
 
 
 interface AllTicketsModalProps{
@@ -37,6 +38,8 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   const [ isSelectDateOpen, setSelectDateOpen ] = useState(false)
   const [ isReportModalOpen, setReportModalOpen] = useState(false)
   const [ selectedDateFilter, setSelectedDateFilter ] = useState<DateRange | undefined>(undefined)
+
+  const { isAdmin } = useContext(AuthContext)
 
   function closeReportModal(){
     setReportModalOpen(false)
@@ -220,13 +223,15 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
           </h2>
 
           <div className="flex gap-2 w-fit">
-            <button
+            {isAdmin && (
+              <button
               onClick={openReportModal}
               className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2">
               <span>
                 <PcCase className="size-5"/>
               </span>
             </button>
+            )}
 
             <button
               onClick={refreshCases}

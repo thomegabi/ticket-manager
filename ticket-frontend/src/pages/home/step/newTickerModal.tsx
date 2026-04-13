@@ -1,7 +1,8 @@
 import { Building, CircleAlert, Info, User, X } from "lucide-react"
-import { useState, type FormEvent } from "react"
+import { useContext, useState, type FormEvent } from "react"
 import { Button } from "../../../components/button"
 import { api } from "../../../../lib/axios"
+import { AuthContext } from "../../../../context/authContext"
 
 interface NewTicketModalProps {
   closeNewTicketModal: () => void,
@@ -12,6 +13,8 @@ const [ selectedCompany, setSelectedCompany ] = useState<string>('KIA')
 const [ selectedPriority, setSelectedPriority ] = useState<string>('VERY_LOW')
 const [ errorHandler, setErrorHandler ] = useState<string | null>(null)
 const [loading, setLoading] = useState(false)
+const{ isAdmin } = useContext(AuthContext)
+
 
 
   async function createTicket(event: FormEvent<HTMLFormElement>) {
@@ -25,19 +28,6 @@ const [loading, setLoading] = useState(false)
   const data = new FormData(event.currentTarget)
 
   const description = data.get('description')?.toString()
-  const openedByName = data.get('openedByName')?.toString()
-
-  if(!description?.trim()){
-    setErrorHandler('Descreva o seu problema')
-    setLoading(false)
-    return
-  }
-
-  if(!openedByName?.trim()){
-    setErrorHandler('Usuario não identificado')
-    setLoading(false)
-    return
-  }
 
   if(!selectedCompany?.trim()){
     setErrorHandler('Selecione uma empresa')
@@ -53,7 +43,6 @@ const [loading, setLoading] = useState(false)
 
   try{
     await api.post('/cases/create', {
-      openedByName,
       company: selectedCompany,
       priority: selectedPriority,
       description
@@ -87,16 +76,6 @@ const [loading, setLoading] = useState(false)
         </div>
 
         <form onSubmit={createTicket} className="space-y-3">
-          <div className="h-14 px-5 bg-zinc-950 text-zinc-50 rounded-lg flex items-center gap-2.5 justify-between">
-            <User className="text-zinc-400 size-5"/>
-            <input 
-              type="text"
-              name="openedByName" 
-              placeholder="Nome de usuário" 
-              className="bg-transparent text-lg placeholder-zinc-400 w-40 outline-none flex-1"
-            />
-            <Info className="text-zinc-400 size-5"/>
-          </div>
 
           <div className="h-32 px-5 py-3 bg-zinc-950 text-zinc-50 rounded-lg">
             <textarea
@@ -132,15 +111,25 @@ const [loading, setLoading] = useState(false)
 
             <div className="h-14 px-5 bg-zinc-950 w-72 text-zinc-50 rounded-lg flex items-center gap-2.5">
               <CircleAlert className="text-zinc-400 size-5"/>
-              <select name="priority" className="p-1 outline-none w-full bg-black h-9 rounded-md text-zinc-50 border-zinc-950 border cursor-pointer" onChange={(e) => setSelectedPriority(e.target.value)}>
+              <select
+                name="priority"
+                className="p-1 outline-none w-full bg-black h-9 rounded-md text-zinc-50 border-zinc-950 border cursor-pointer"
+                onChange={(e) => setSelectedPriority(e.target.value)}
+              >
                 <option value="" disabled>
                   Qual a prioridade?
                 </option> 
+
                 <option value="VERY_LOW">Muito Baixa</option>
                 <option value="LOW">Baixa</option>
                 <option value="NORMAL">Media</option>
-                <option value="HIGH">Alta</option>
-                <option value="VERY_HIGH">Muito Alta</option>
+
+                {isAdmin && (
+                  <>
+                    <option value="HIGH">Alta</option>
+                    <option value="VERY_HIGH">Muito Alta</option>
+                  </>
+                )}
               </select>
             </div>
           </div>

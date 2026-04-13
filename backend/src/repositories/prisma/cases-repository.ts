@@ -66,6 +66,9 @@ async getDurationReport(userId: string, startDate?: Date, endDate?: Date) {
         lte: endDate
       }
     },
+    orderBy: {
+      created_at: "asc"
+    },
     select: {
       created_at: true,
       duration: true
