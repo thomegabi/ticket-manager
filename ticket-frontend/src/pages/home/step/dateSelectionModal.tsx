@@ -22,7 +22,7 @@ export function DateStep({ closeSelectDate, selectedDate, closeSelectDateWithDat
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="rounded-xl py-5 px-6 shadow-shape bg-zinc-800 space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">

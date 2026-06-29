@@ -215,8 +215,6 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   return (
     <div className="inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm p-4 md:p-8">
       <div className="w-full h-full max-w-screen-2xl bg-[#09090b] border border-zinc-800/60 shadow-2xl flex flex-col space-y-6 rounded-3xl p-6 md:p-8 overflow-hidden">
-        
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
             Painel de Tickets
@@ -227,7 +225,7 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
               <button
                 onClick={openReportModal}
                 title="Relatórios"
-                className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-amber-500 px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+                className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-amber-500 px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer"
               >
                 <PcCase className="size-5" />
               </button>
@@ -236,7 +234,7 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
             <button
               onClick={refreshCases}
               title="Atualizar"
-              className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+              className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer"
             >
               <RefreshCcw className={`size-5 ${loading ? "animate-spin text-amber-500" : ""}`} />
             </button>
@@ -244,7 +242,7 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
             <button 
               onClick={openSelectDate}
               title="Filtrar por Data"
-              className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+              className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer"
             >
               {selectedDateFilter !== undefined ? (
                 <CalendarCheck2 className="size-5 text-amber-500" />
