@@ -8,11 +8,13 @@ const router = express.Router();
 
 router.get('/cases', casesController.getCases);
 
+router.get('/cases/myCases', verifyToken, casesController.getMyCases)
+
 router.get('/case/:caseId', casesController.getCasesById)
 
 router.get('/cases/report', verifyToken, casesController.getDurationReport)
 
-router.post('/cases/create', casesController.createCase);
+router.post('/cases/create', verifyToken, casesController.createCase);
 
 router.put('/update/:caseId', verifyToken, casesController.updateCase)
 
