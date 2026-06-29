@@ -6,6 +6,7 @@ interface AuthContextProps {
   isAdmin: boolean;
   setToken: (token: string, isAdmin?: boolean) => void;
   logout: () => void;
+  loading: boolean;
 }
 
 export const AuthContext = createContext({} as AuthContextProps);
@@ -14,6 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setTokenState] = useState<string | null>(null);
   const [isLogged, setIsLogged] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLogged(true);
         setIsAdmin(storedAdmin === "true");
       }
+      setLoading(false);
   }, []);
 
   function setToken(token: string, isAdminFlag: boolean = false) {
@@ -47,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, isLogged, isAdmin, setToken, logout }}>
+    <AuthContext.Provider value={{ token, isLogged, isAdmin, setToken, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

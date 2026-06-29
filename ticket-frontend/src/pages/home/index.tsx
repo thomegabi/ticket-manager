@@ -37,7 +37,6 @@ export function HomePage() {
         const response = await api.get('/users');
         const users: Users[] = response.data.usersJson;
         setUsers(users);
-        console.log('Fetched users:', users);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
