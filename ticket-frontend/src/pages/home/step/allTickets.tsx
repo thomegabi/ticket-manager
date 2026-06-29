@@ -6,7 +6,6 @@ import { DateStep } from "./dateSelectionModal";
 import { ReportModal } from "./durationReportModal";
 import { AuthContext } from "../../../../context/authContext";
 
-
 interface AllTicketsModalProps{
   handleTicketSelection: (id: string) => void;
   cases: Cases[]
@@ -110,7 +109,6 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
       !inProgressTicketFilter || caso.status === "IN_PROGRESS"
     )
 
-    // filtro de data (day-picker)
     .filter(caso => {
       if (!selectedDateFilter?.from && !selectedDateFilter?.to) return true
 
@@ -147,30 +145,30 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   function getStatusStyle(status: string) {
     switch (status) {
       case "OPEN":
-        return "bg-emerald-500/20 text-emerald-400"
+        return "bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20"
       case "IN_PROGRESS":
-        return "bg-yellow-500/20 text-yellow-400"
+        return "bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20"
       case "CLOSED":
-        return "bg-zinc-500/20 text-zinc-300"
+        return "bg-zinc-500/10 text-zinc-300 ring-1 ring-inset ring-zinc-500/20"
       default:
-        return "bg-zinc-700 text-white"
+        return "bg-zinc-800 text-white ring-1 ring-inset ring-zinc-700"
     }
   }
 
   function getPriorityStyle(priority: string) {
     switch (priority) {
       case "VERY_LOW":
-        return "bg-cyan-500/20 text-cyan-400"
+        return "bg-cyan-500/10 text-cyan-400 ring-1 ring-inset ring-cyan-500/20"
       case "LOW":
-        return "bg-green-500/20 text-green-400"
+        return "bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/20"
       case "NORMAL":
-        return "bg-yellow-500/20 text-yellow-300"
+        return "bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/20"
       case "HIGH":
-        return "bg-red-500/20 text-red-300"
+        return "bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/20"
       case "VERY_HIGH":
-        return "bg-violet-500/20 text-violet-300"
+        return "bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20"
       default:
-        return "bg-zinc-700 text-white"
+        return "bg-zinc-800 text-white ring-1 ring-inset ring-zinc-700"
     }
   }
 
@@ -215,121 +213,141 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   }
 
   return (
-    <div className="inset-0  flex items-center justify-center z-50 ">
-      <div className="w-full h-full bg-zinc-900 shadow-2xl p-6 flex flex-col space-y-6 rounded-2xl">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold text-white">
-            Tickets
+    <div className="inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm p-4 md:p-8">
+      <div className="w-full h-full max-w-screen-2xl bg-[#09090b] border border-zinc-800/60 shadow-2xl flex flex-col space-y-6 rounded-3xl p-6 md:p-8 overflow-hidden">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+            Painel de Tickets
           </h2>
 
-          <div className="flex gap-2 w-fit">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             {isAdmin && (
               <button
-              onClick={openReportModal}
-              className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2">
-              <span>
-                <PcCase className="size-5"/>
-              </span>
-            </button>
+                onClick={openReportModal}
+                title="Relatórios"
+                className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-amber-500 px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+              >
+                <PcCase className="size-5" />
+              </button>
             )}
 
             <button
               onClick={refreshCases}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2">
-              <span className={`${loading ? "animate-spin" : ""}`}>
-                <RefreshCcw className="size-5"/>
-              </span>
+              title="Atualizar"
+              className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+            >
+              <RefreshCcw className={`size-5 ${loading ? "animate-spin text-amber-500" : ""}`} />
             </button>
 
-            <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg cursor-pointer flex items-center gap-2" onClick={openSelectDate}>
+            <button 
+              onClick={openSelectDate}
+              title="Filtrar por Data"
+              className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-white px-4 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-2 shadow-sm"
+            >
               {selectedDateFilter !== undefined ? (
-                <CalendarCheck2 className="size-5 text-sky-400"/>
+                <CalendarCheck2 className="size-5 text-amber-500" />
               ) : (
-                <CalendarSearch className="size-5"/>
+                <CalendarSearch className="size-5" />
               )}
             </button>
 
-            <input
-              type="text"
-              placeholder="Buscar ticket..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-72 bg-zinc-800 text-zinc-200 px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-amber-500"
-            />
+            <div className="relative flex-1 md:w-72">
+              <input
+                type="text"
+                placeholder="Buscar ticket ou usuário..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-zinc-900/50 border border-zinc-800/80 text-zinc-200 placeholder:text-zinc-500 px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all shadow-sm"
+              />
+            </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4">
-          <StatCard title="Total" value={filteredCases.length} />
-          <StatCard title="Abertos" value={filteredCases.filter(c => c.status === "OPEN").length} />
-          <StatCard title="Em andamento" value={filteredCases.filter(c => c.status === "IN_PROGRESS").length} />
-          <StatCard title="Fechados" value={filteredCases.filter(c => c.status === "CLOSED").length} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard title="Total de Tickets" value={filteredCases.length} />
+          <StatCard title="Abertos" value={filteredCases.filter(c => c.status === "OPEN").length} indicatorColor="bg-emerald-500" />
+          <StatCard title="Em andamento" value={filteredCases.filter(c => c.status === "IN_PROGRESS").length} indicatorColor="bg-amber-500" />
+          <StatCard title="Fechados" value={filteredCases.filter(c => c.status === "CLOSED").length} indicatorColor="bg-zinc-500" />
         </div>
 
-        {/* Table */}
-        <div className="overflow-y-auto h-100 rounded-xl border border-zinc-800">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-800 text-zinc-400 uppercase text-xs">
+        {/* Table Container */}
+        <div className="flex-1 overflow-auto rounded-2xl border border-zinc-800/60 bg-[#0c0c0e] shadow-inner [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-800 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-[#0c0c0e]/90 backdrop-blur-md sticky top-0 z-10 text-zinc-400 uppercase text-xs font-semibold tracking-wider border-b border-zinc-800/80">
               <tr>
-                <th className="p-4">ID</th>
-                <th className="p-4">Usuario</th>
-                <th className="p-4">Empresa</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Data</th>
-                <th className="p-4">Prioridade</th>
-                <th className="p-4">Responsável</th>
-                <th className="p-4"></th>
+                <th className="px-6 py-4">ID</th>
+                <th className="px-6 py-4">Usuário</th>
+                <th className="px-6 py-4">Empresa</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Data</th>
+                <th className="px-6 py-4">Prioridade</th>
+                <th className="px-6 py-4">Responsável</th>
+                <th className="px-6 py-4 text-right">Ação</th>
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="divide-y divide-zinc-800/50">
               {filteredCases.map((caso) => (
                 <tr
                   key={caso.id}
-                  className="border-t border-zinc-800 hover:bg-zinc-800/40 transition"
+                  className="hover:bg-zinc-800/30 transition-colors group"
                 >
-                  <td className="p-4 text-zinc-400">#{caso.id.slice(0,6)}</td>
-                  <td className="p-4 text-white">{caso.openedByName}</td>
-                  <td className="p-4 text-zinc-400">{translateCompany(caso.company)}</td>
+                  <td className="px-6 py-4 font-mono text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                    #{caso.id.slice(0, 6)}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-zinc-200">
+                    {caso.openedByName}
+                  </td>
+                  <td className="px-6 py-4 text-zinc-400">
+                    {translateCompany(caso.company)}
+                  </td>
 
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(caso.status)}`}>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyle(caso.status)}`}>
                       {translateStatus(caso.status)}
                     </span>
                   </td>
 
-                  <td className="p-4 text-zinc-400">
+                  <td className="px-6 py-4 text-zinc-400">
                     {new Date(caso.created_at).toLocaleDateString('pt-BR')}
                   </td>
 
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityStyle(caso.priority)}`}>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getPriorityStyle(caso.priority)}`}>
                       {translatePriority(caso.priority)}
                     </span>
                   </td>
 
-                  <td className="p-4">
-                    <span className={`p-4 text-white`}>
-                      {caso.assignedUserName}
-                    </span>
+                  <td className="px-6 py-4 text-zinc-300">
+                    {caso.assignedUserName}
                   </td>
 
-                  <td className="p-4 text-right">
+                  <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => handleTicketSelection(caso.id)}
-                      className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs transition cursor-pointer"
+                      className="bg-white text-zinc-950 hover:bg-zinc-200 font-semibold px-4 py-2 rounded-lg text-xs transition-all active:scale-95 shadow-sm"
                     >
-                      Selecionar
+                      Detalhes
                     </button>
                   </td>
                 </tr>
               ))}
+              
+              {filteredCases.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
+                    Nenhum ticket encontrado com os filtros atuais.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-
       </div>
+
       {isSelectDateOpen && (
         <DateStep 
           closeSelectDate={closeSelectDate}
@@ -348,12 +366,18 @@ export function AllTicketsModal({ handleTicketSelection, cases, myTicketsFilter,
   )
 }
 
-/* Stat Card */
-function StatCard({ title, value }: { title: string, value: number }) {
+/* Stat Card Otimizado */
+function StatCard({ title, value, indicatorColor }: { title: string, value: number, indicatorColor?: string }) {
   return (
-    <div className="bg-zinc-800 rounded-xl p-4 flex flex-col">
-      <span className="text-zinc-400 text-sm">{title}</span>
-      <span className="text-white text-2xl font-semibold">{value}</span>
+    <div className="relative overflow-hidden bg-zinc-900/40 border border-zinc-800/60 rounded-2xl p-5 flex flex-col group hover:bg-zinc-800/40 transition-colors">
+      <div className="flex items-center gap-2 mb-2">
+        {indicatorColor && <div className={`size-2 rounded-full ${indicatorColor}`} />}
+        <span className="text-zinc-400 text-sm font-medium">{title}</span>
+      </div>
+      <span className="text-zinc-100 text-3xl font-bold tracking-tight">{value}</span>
+      
+      {/* Efeito visual de fundo */}
+      <div className="absolute -bottom-6 -right-6 size-24 bg-gradient-to-tl from-zinc-800/50 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     </div>
   )
 }
